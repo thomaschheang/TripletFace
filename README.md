@@ -6,6 +6,66 @@ The repository contains code for the application of triplet loss training to the
 task of facial recognition. This code has been produced for a lecture and is not
 going to be maintained in any sort.
 
+# Python Notebook
+
+```bash
+!git clone https://github.com/thomaschheang/TripletFace.git
+
+from __future__ import print_function, division
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.optim import lr_scheduler
+from torch.autograd import Variable
+import numpy as np
+import torchvision
+from torchvision import datasets, models, transforms
+import matplotlib.pyplot as plt
+import time
+import os
+import copy
+import csv
+
+plt.ion()  
+
+use_gpu = torch.cuda.is_available()
+if use_gpu:
+    print("Using CUDA")
+    
+!pip3 install triplettorch
+from triplettorch import HardNegativeTripletMiner
+from triplettorch import AllTripletMiner
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+!unzip "/content/drive/My Drive/DatasetIA.zip"
+
+%cd ../content/TripletFace/
+!ls
+
+!python -m tripletface.train -s ../dataset/ -m -e 5 -b 64 -i 240
+
+from tripletface.core.model import Encoder
+
+model = Encoder(64)
+weights = torch.load( "/content/TripletFace/model/model.pt" )['model']
+model.load_state_dict( weights )
+jit_model = torch.jit.trace(model,torch.rand(3, 3, 5, 8)) 
+torch.jit.save( jit_model, "/content/drive/My Drive/IA/jit_model.pt" )
+
+!cd /content/drive/My\ Drive/ && git init IA/
+
+!cd /content/drive/My\ Drive/IA/ && git add jit_model.pt
+
+u = 'thomaschheang'
+p =  'password'
+!cd /content/drive/My\ Drive/IA/ && git remote add origin https://{u}:{p}@github.com/{u}/TripletFace.git
+
+!cd /content/drive/My\ Drive/IA/ && git pull origin master
+```
+
 ![TSNE_Latent](TSNE_Latent.png)
 
 ## Architecture
